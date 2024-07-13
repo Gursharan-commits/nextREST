@@ -9,7 +9,7 @@ const ObjectId = require("mongoose").Types.ObjectId;
 
 export const GET = async (request: Request) => {
     try {
-        const { searchParams } = new URL(request.url)
+        const { searchParams } = new URL(request.url);
         const userId = searchParams.get("userId");
 
         if (!userId || !Types.ObjectId.isValid(userId)) {
@@ -42,17 +42,14 @@ export const POST = async (request: Request) => {
         const { searchParams } = new URL(request.url);
         const userId = searchParams.get("userId")
 
-        if (!userId || !Types.ObjectId.isValid(userId)) {
+        await connect();
+
+        const user = await User.findById(userId);
+        if (!userId || !Types.ObjectId.isValid(userId) || !user) {
             return new NextResponse(JSON.stringify({ message: "invalid Userid" }), { status: 400 })
         }
 
         const { title } = await request.json();
-        await connect();
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return new NextResponse(JSON.stringify({ message: "User not found" }), { status: 400 })
-        }
         const newCategory = new Category({
             title: title,
             user: new Types.ObjectId(userId)
